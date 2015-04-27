@@ -171,11 +171,9 @@
 
 
     RotatingCalipers.prototype.angleBetweenVectors = function(vector1, vector2) {
-      var dotProduct, magnitude1, magnitude2;
-      dotProduct = vector1[0] * vector2[0] + vector1[1] * vector2[1];
-      magnitude1 = Math.sqrt(vector1[0] * vector1[0] + vector1[1] * vector1[1]);
-      magnitude2 = Math.sqrt(vector2[0] * vector2[0] + vector2[1] * vector2[1]);
-      return Math.acos(dotProduct / (magnitude1 * magnitude2));
+		var dot = vector1[0] * vector2[0] + vector1[1] * vector2[1];
+		var cross = vector1[0] * vector2[1] - vector1[1] * vector2[0];
+		return Math.abs(Math.atan2(cross,dot));		
     };
 
     /*
@@ -193,6 +191,12 @@
       rotated = [];
       rotated[0] = vector[0] * Math.cos(angle) - vector[1] * Math.sin(angle);
       rotated[1] = vector[0] * Math.sin(angle) + vector[1] * Math.cos(angle);
+	  //workaround case of very near vertical/horizontal lines
+	  //Not sure what the magic numbers should be
+	  if ((Math.abs(rotated[0]-0) <0.000000001) || (Math.abs(rotated[1]-0) <0.000000001)){
+		rotated[0]=Math.round(rotated[0]);
+		rotated[1]=Math.round(rotated[1]);
+	  }
       return rotated;
     };
 
@@ -323,8 +327,9 @@
       /*
           Repeat computing, until the lines have been rotated an angle greater than 90 degrees.
       */
-
-      while (rotatedAngle < Math.PI) {
+	  // 1.5707963267948966 -~ Math.PI/2  91.7 degrees = 1.6 radians; 90 degrees = pi/2 radians
+      while (rotatedAngle <= 1.571 ) {
+      //while (rotatedAngle < Math.PI) {
         /*
               Calculate the angle between the edge next adjacent to each extreme point
               and its caliper. The minimum of those angles indicates the angle needed
